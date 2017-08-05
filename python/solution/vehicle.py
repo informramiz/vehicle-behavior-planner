@@ -87,7 +87,7 @@ class Vehicle(object):
       predictions_copy = deepcopy(predictions)
 
       #find trajectory for this state
-      trajectory = self._trajectory_for_state(state,predictions_copy)
+      trajectory = self._trajectory_for_state(state, predictions_copy)
 
       #calculate cost for moving to current state using found trajectory
       cost = calculate_cost(self, trajectory, predictions)
@@ -98,7 +98,9 @@ class Vehicle(object):
     return best['state']
 
   """
-  finds trajectory for passed @param state, for given time horizon
+  finds trajectory (sequence of behavior changes for given time horizon)
+  for passed @param state and based on first 5 other vehicle predictions,
+  for given time horizon (by default, horizon=5)
   and based on passed predictions
   """
   def _trajectory_for_state(self, state, predictions, horizon=5):
@@ -112,22 +114,35 @@ class Vehicle(object):
 
     #for given time horizon
     for i in range(horizon):
+      ## RESET VEHICLE STATE
       #restore vehicle state (lane, s, v, a, state) from snapshot
       self.restore_state_from_snapshot(snapshot)
+
       #use the passed state as current state
       self.state = state
+
+      #update vehicle to passed state by changing (lane, a) based on given state and
+      #predictions of other vehicles
       self.realize_state(predictions)
+
+      #crash if lane is not in limit [0, lanes_available]
       assert 0 <= self.lane < self.lanes_available, "{}".format(self.lane)
+
+      #update current vehicle (s, v) for delta_t=1, assuming constant acceleration
       self.increment()
+
+      #append current details (lane, s, v, a, state) to trajectory
       trajectory.append(self.snapshot())
 
-      # need to remove first prediction for each vehicle.
-      # pdb.set_trace()
+      # As one timestep has been finished so we
+      #need to remove first prediction for each vehicle
+      # so that all vehicles predictions start from the next timestep
       for v_id, v in predictions.items():
         v.pop(0)
 
-    # restore state from snapshot
+    # restore state from snapshot to state before this function was called
     self.restore_state_from_snapshot(snapshot)
+
     return trajectory
 
   """
