@@ -40,7 +40,7 @@ def change_lane_cost(vehicle, trajectory, predictions, data):
 	if proposed_lanes < cur_lanes:
 		cost = -COMFORT
 	if cost != 0:
-		print "!! \n \ncost for lane change is {}\n\n".format(cost)
+		print("!! \n \ncost for lane change is {}\n\n".format(cost))
 	return cost
 
 def distance_from_goal_lane(vehicle, trajectory, predictions, data):
@@ -99,7 +99,7 @@ def calculate_cost(vehicle, trajectory, predictions, verbose=False):
 		change_lane_cost]:
 		new_cost = cf(vehicle, trajectory, predictions, trajectory_data)
 		if DEBUG or verbose:
-			print "{} has cost {} for lane {}".format(cf.__name__, new_cost, trajectory[-1].lane)
+			print("{} has cost {} for lane {}".format(cf.__name__, new_cost, trajectory[-1].lane))
 			# pdb.set_trace()
 		cost += new_cost
 	return cost
