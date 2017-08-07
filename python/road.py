@@ -1,24 +1,40 @@
 import random
 from vehicle import Vehicle
+import pdb
 
 class Road(object):
   update_width = 70
   ego_rep = " *** "
   ego_key = -1
+
+  """
+  initialize necessary params (num_lanes, lane_speeds, speed_limit, traffic_density,
+  camera_center) based on params passed from Simulator
+  """
   def __init__(self, speed_limit, traffic_density, lane_speeds):
     self.num_lanes = len(lane_speeds)
     self.lane_speeds = lane_speeds
     self.speed_limit = speed_limit
     self.density = traffic_density
-    self.camera_center = self.update_width / 2
+    self.camera_center = self.update_width // 2
     self.vehicles = {}
     self.vehicles_added = 0
-        
+    self.goal_lane = None
+    self.goal_s = None
+
+
+  """
+  Return ego vehicle
+  """
   def get_ego(self):
     return self.vehicles[self.ego_key]
-    
+
+  """
+  Populates vehicles on the road and in each lane, based on traffic_density.
+  Save vehicles added into a dictionary with vehicle_id as key
+  """
   def populate_traffic(self):
-    start_s = max(self.camera_center - (self.update_width / 2), 0)
+    start_s = max(self.camera_center - (self.update_width // 2), 0)
     for l in range(self.num_lanes):
       lane_speed = self.lane_speeds[l]
       vehicle_just_added = False
@@ -33,23 +49,38 @@ class Road(object):
           self.vehicles[self.vehicles_added] = vehicle
           vehicle_just_added = True
 
+  """
+  Updates all vehicles to move by delta_t = 1 while allowing ego
+  vehicle to update its state based on other vehicles' predictions
+  """
   def advance(self):
+    #predict behavior for each vehiclel for timesteps (time horizon) = 10
     predictions = {}
     for v_id, v in self.vehicles.items():
       preds = v.generate_predictions()
       predictions[v_id] = preds
+
     for v_id, v in self.vehicles.items():
+      #let ego vehicle update its state
       if v_id == self.ego_key:
         v.update_state(predictions)
         v.realize_state(predictions)
+
+      #update other vehicles with delta_t = 1
       v.increment()
 
+  """
+  Adds ego vehicle to the road (and in vehicles dictionary) in given lane and initialize it with passed
+  data. Ego vehicle is added to vehicles dictionary at key = -1
+  """
   def add_ego(self, lane_num, s, config_data):
     for v_id, v in self.vehicles.items():
       if v.lane == lane_num and v.s == s:
         del self.vehicles[v_id]
     ego = Vehicle(lane_num, s, self.lane_speeds[lane_num], 0)
     ego.configure(config_data)
+    self.goal_lane = ego.goal_lane
+    self.goal_s = ego.goal_s
     ego.state = "KL"
     self.vehicles[self.ego_key] = ego
 
@@ -58,18 +89,18 @@ class Road(object):
     center_s = ego.s
     claimed = set([(v.lane, v.s) for v in self.vehicles.values()])
     for v_id, v in self.vehicles.items():
-      if v.s > (center_s + self.update_width / 2) or v.s < (center_s - self.update_width / 2):
+      if v.s > (center_s + self.update_width // 2) or v.s < (center_s - self.update_width // 2):
         try:
           claimed.remove((v.lane,v.s))
         except:
           continue
         del self.vehicles[v_id]
-        
+
         placed = False
         while not placed:
           lane_num = random.choice(range(self.num_lanes))
-          ds = random.choice(range(self.update_width/2-15,self.update_width/2 -1 ))
-          if lane_num > self.num_lanes / 2:
+          ds = random.choice( range(self.update_width//2 - 15, self.update_width//2 - 1 ))
+          if lane_num <= self.num_lanes // 2:
             ds *= -1
           s = center_s + ds
           if (lane_num, s) not in claimed:
@@ -78,21 +109,31 @@ class Road(object):
             vehicle = Vehicle(lane_num, s, speed, 0)
             self.vehicles_added += 1
             self.vehicles[self.vehicles_added] = vehicle
-            print 'adding vehicle {} at lane {} with s={}'.format(self.vehicles_added, lane_num, s)
+            print('adding vehicle {} at lane {} with s={}').format(self.vehicles_added, lane_num, s)
 
   def __repr__(self):
     s = self.vehicles.get(self.ego_key).s
-    self.camera_center = max(s, self.update_width / 2)
-    s_min = max(self.camera_center - self.update_width /2, 0)
+    self.camera_center = max(s, self.update_width // 2)
+    s_min = max(self.camera_center - self.update_width // 2, 0)
+    s_min = int(s_min)
     s_max = s_min + self.update_width
     road = [["     " if i % 3 == 0 else "     "for ln in range(self.num_lanes)] for i in range(self.update_width)]
+    if s_min <= self.goal_s < s_max:
+      # print "goal_s is {}".format(self.goal_s)
+      # pdb.set_trace()
+      road[int(self.goal_s - s_min)][self.goal_lane] = " -G- "
     for v_id, v in self.vehicles.items():
       if s_min <= v.s < s_max:
         if v_id == self.ego_key:
           marker = self.ego_rep
         else:
           marker = " %03d " % v_id
-        road[v.s - s_min][v.lane] = marker
+        try:
+          road[int(v.s - s_min)][v.lane] = marker
+        except IndexError:
+          print("IndexError")
+          pdb.set_trace()
+          continue
     s = ""
     i = s_min
     for l in road:

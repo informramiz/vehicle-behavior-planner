@@ -9,6 +9,8 @@ SPEED_LIMIT       = 10
 # all traffic in lane (besides ego) follow these speeds
 LANE_SPEEDS       = [6,7,8,9] 
 
+# LANE_SPEEDS       = [5,6,7,8]
+
 # Number of available "cells" which should have traffic
 TRAFFIC_DENSITY   = 0.15
 
@@ -17,7 +19,7 @@ TRAFFIC_DENSITY   = 0.15
 MAX_ACCEL         = 2
 
 # s value and lane number of goal.
-GOAL              = (300, 3)
+GOAL              = (300, 0)
 
 # These affect the visualization
 FRAMES_PER_SECOND = 4
@@ -30,7 +32,7 @@ def main():
 	ego_config = config = {
 	    'speed_limit' : SPEED_LIMIT,
 	    'num_lanes' : len(LANE_SPEEDS),
-	    'goal' : (300, 3),
+	    'goal' : GOAL,
 	    'max_acceleration': MAX_ACCEL
 	}
 	road.add_ego(2,0, ego_config)
@@ -38,16 +40,16 @@ def main():
 	while road.get_ego().s <= GOAL[0]:
 		timestep += 1
 		if timestep > 150: 
-			print "Taking too long to reach goal. Go faster!"
+			print ("Taking too long to reach goal. Go faster!")
 			break
 		road.advance()
-		print road
+		print(road)
 		time.sleep(float(1.0) / FRAMES_PER_SECOND)
 	ego = road.get_ego()
 	if ego.lane == GOAL[1]:
-		print "You got to the goal in {} seconds!".format(timestep)
+		print("You got to the goal in {} seconds!".format(timestep))
 	else:
-		print "You missed the goal. You are in lane {} instead of {}.".format(ego.lane, GOAL[1])
+		print("You missed the goal. You are in lane {} instead of {}.".format(ego.lane, GOAL[1]))
 
 
 if __name__ == "__main__":
