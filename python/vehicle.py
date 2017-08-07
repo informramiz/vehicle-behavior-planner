@@ -73,7 +73,7 @@ class Vehicle(object):
       if self.lane == 0:
           #ego vehicle is at left most lane so LCL is not possible
           states.remove("LCL")
-      else if self.lane == (self.lanes_available - 1):
+      elif self.lane == (self.lanes_available - 1):
           #ego vehicle is at right most lane so LCR is not possible
           states.remove("LCR")
 
@@ -93,9 +93,53 @@ class Vehicle(object):
       best = min(costs, key=lambda s: s["cost"])
       return best["state"]
 
-   def find_trajectory_for_state(self, state, predictions):
-       #TODO: implement this method
-       return None
+  """
+  finds trajectory (sequence of behavior (lane, s, v, a, state) changes for given time horizon)
+  for passed @param state and based on first 5 other vehicle predictions,
+  for given time horizon (by default, horizon=5)
+  and based on passed predictions
+  """
+  def find_trajectory_for_state(self, state, predictions, horizon=5):
+      #save current state snapshot
+      current_state_snapshot = take_snapshot()
+
+      #pretend to be in given state
+      self.state = state
+
+      #a trajectory is a sequence of vehicle state snapshots
+      #start defining trajectory by adding the current state
+      #as starting point
+      trajectory = [current_state_snapshot]
+
+      for i in range(horizon):
+          #reset vehicle state to original state
+          self.restore_state_from_snapshot(current_state_snapshot)
+
+          #pretend vehicle to be in passed state
+          self.state = state
+          #realize/apply this new state vehicle is in by
+          #updating (a, lane)
+          self.realize_state(predictions)
+
+          #validate lane number and crash if invalid
+          assert 0 <= self.lane < self.lanes_available, "Invalid lane {}".format(self.lane)
+
+          #increment vehicle (s, v) for 1 timestep
+          self.increment()
+
+          #append this new vehicle state snapshot to trajectory
+          trajectory.append(self.take_snapshot())
+
+          #remove predictions of other vehicle for current timehorizon
+          #which is: Remove first prediction of each vehicle
+          for v_id, v in predictions.items():
+              v.pop(0)
+
+              #now that trajectory is found we need to reset
+              #this vehicle's state to its original state
+              self.restore_state_from_snapshot(current_state_snapshot)
+
+              return trajectory
 
   """
   Saves current vehicle state into a Snapshot
@@ -106,7 +150,7 @@ class Vehicle(object):
   """
   Restores vehicle state (lane, s, v, a, state) from given snapshot
   """
-  def restore_state_from_snapshot(self, Snapshot snapshot):
+  def restore_state_from_snapshot(self, snapshot):
       self.lane = snapshot.lane
       self.s = snapshot.s
       self.v = snapshot.v
