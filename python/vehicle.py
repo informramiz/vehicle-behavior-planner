@@ -1,4 +1,4 @@
-#from cost_functions import calculate_cost
+from my_cost_functions import calculate_cost
 from collections import namedtuple
 from copy import deepcopy
 import pdb
@@ -61,6 +61,41 @@ class Vehicle(object):
     """
 
     # self.state = "KL" # this is an example of how you change state.
+
+  """
+  Predicts next state by go through each state using Finite State Machine (FSM) alogrithm
+  to choose the best next possible next.
+  """
+  def get_next_state(self, predictions):
+      states = ["KL", "LCL", "LCR"]
+
+      #let's remove impossible next states
+      if self.lane == 0:
+          #ego vehicle is at left most lane so LCL is not possible
+          states.remove("LCL")
+      else if self.lane == (self.lanes_available - 1):
+          #ego vehicle is at right most lane so LCR is not possible
+          states.remove("LCR")
+
+      #let's calculate cost for each state
+      costs = {}
+      for state in states:
+          #find trajectory to go take this state
+          #TODO implement method
+          trajectory = find_trajectory_for_state(state, predictions)
+
+          #calculate cost for this trajectory
+          cost = calculate_cost(self, trajectory, predictions)
+
+          costs.append({"state": state, "cost": cost})
+
+      #find (state, cost) pair with minimum cost
+      best = min(costs, key=lambda s: s["cost"])
+      return best["state"]
+
+   def find_trajectory_for_state(self, state, predictions):
+       #TODO: implement this method
+       return None
 
   """
   Saves current vehicle state into a Snapshot
