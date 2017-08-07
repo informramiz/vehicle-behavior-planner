@@ -3,6 +3,8 @@ from collections import namedtuple
 from copy import deepcopy
 import pdb
 
+Snapshot = namedtuple("Snapshot", ["lane", "s", "v", "a", "state"])
+
 class Vehicle(object):
   L = 1
   preferred_buffer = 6 # impacts "keep lane" behavior.
@@ -59,6 +61,22 @@ class Vehicle(object):
     """
 
     # self.state = "KL" # this is an example of how you change state.
+
+  """
+  Saves current vehicle state into a Snapshot
+  """
+  def take_snapshot(self):
+      return Snapshot(self.lane, self.s, self.v, self.a, self.state)
+
+  """
+  Restores vehicle state (lane, s, v, a, state) from given snapshot
+  """
+  def restore_state_from_snapshot(self, Snapshot snapshot):
+      self.lane = snapshot.lane
+      self.s = snapshot.s
+      self.v = snapshot.v
+      self.a = snapshot.a
+      self.state = snapshot.state
 
   """
   Called by simulator before simulation begins. Sets various
