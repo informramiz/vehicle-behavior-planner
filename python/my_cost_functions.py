@@ -17,6 +17,41 @@ TrajectoryData = namedtuple("TrajectoryData", [
 def calculate_cost(vehicle, trajectory, predictions):
     #TODO: implement
     return 0
+
+"""
+Detects collision between ego vehicle and other vehicle based on
+ego vehicle (s, v) and other vehicle (s_now, s_previous)
+"""
+def check_collision(ego_vehicle, other_vehicle_s_previous, other_vehicle_s_now):
+    ego_vehicle_s = ego_vehicle.s
+    ego_vehicle_v = ego_vehicle.v
+
+    #calculate other vehicle speed
+    #which is: (s_previous - s_now)/dt but as dt=1 so
+    other_vehicle_v = other_vehicle_s_now - other_vehicle_s_now
+
+    #There are 3 cases in which vehicle can collide
+
+    #CASE-1: Other vehicle was behind ego vehicle previously but then
+    #accelerated and now on same position as ego_vehicle
+    if other_vehicle_s_previous < ego_vehicle_s:
+        if other_vehicle_s_now >= ego_vehicle_s:
+            return True
+
+    #CASE-2: Other vehicle ahead of ego vehicle but then decelerated
+    #resulting in collision
+    if other_vehicle_s_previous > ego_vehicle_s:
+        if other_vehicle_s_now <= ego_vehicle_s:
+            return True
+
+    #CASE-3: Ego vehicle is right beind other vehicle
+    #and other vehicle has same or less speed than ego vehicle
+    if other_vehicle_s_previous == ego_vehicle_s:
+        if other_vehicle_v <= ego_vehicle_v:
+            return True
+
+    return False
+
 """
 Filter predicted trajectories whose first prediction is in in given lane
 """
