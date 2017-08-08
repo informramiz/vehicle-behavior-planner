@@ -18,11 +18,103 @@ TrajectoryData = namedtuple("TrajectoryData", [
 DESIRED_BUFFER = 1.5
 # timesteps we consider for calculating cost
 PLANNING_HORIZON = 2
+
+#Weights for each cost function
+COLLISION = 10 ** 6
+DANGER = 10 ** 5
+REACH_GOAL = 10 ** 5
+COMFORT = 10 ** 4
+EFFICIENCY = 10 ** 2
+
+
+"""
+Penalizes lane changes AWAY from the goal lane and rewards
+lane changes TOWARDS the goal lane.
+"""
+def lane_change_cost(vehicle, trajectory, predictions, trajectory_data):
+    #this is the lane distance from goal lane that this new trajectory is proposing
+    proposed_distance_to_goal_lane = trajectory_data.end_lanes_from_goal
+    #this is the lane distance from goal lane that is before taking this trajectory
+    previous_distance_to_goal_lane = trajectory[0].lane
+
+    cost = 0.0
+    #if new distance is greater than previous then penalize otherwise reward
+    if proposed_distance_to_goal_lane > previous_distance_to_goal_lane:
+        cost = COMFORT
+    else:
+        #reward as we are moving closer to goal lane
+        cost = -COMFORT
+
+    if cost != 0:
+        print("!! \n \ncost for lane change is {}\n\n".format(cost))
+
+    return cost
+
+def distance_to_goal_lane(vehicle, trajectory, predictions, trajectory_data):
+    #distance to goal
+    distance = abs(trajectory_data.end_distance_to_goal)
+    #we don't want distance to be below 1.0
+    distance = max(distance, 1.0)
+
+    #calculate time left to reach goal/cover remaining distance
+    time_to_goal = float(distance) / trajectory_data.avg_speed
+
+    #the less time we have to reach goal the more difficult it will be to
+    #achieve goal lane
+    cost = (5.0 * trajectory_data.end_lanes_from_goal / time_to_goal)
+
+    #multiply cost with weight
+    return cost * REACH_GOAL
+
+def collision_cost(vehicle, trajectory, predictions, trajectory_data):
+    #if there is no collision then no cost
+    if trajectory_data.collides == False:
+        return 0.0;
+
+    #find out time left till collision
+    time_til_collision = trajectory_data.collides['at']
+    #find cost, use exp function to get range between [0, 1]
+    exponent = (float(time_til_collision)) ** 2
+    cost = exp(-exponent)
+
+    return COLLISION * cost;
+
+def buffer_cost(vehicle, trajectory, predictions, trajectory_data):
+    #check if there is any distance between ego vehicle and next or not
+    if trajectory_data.closest_approach == 0:
+        #we are very close to collision
+        return 10 * DANGER
+
+    #calculate timesteps remaining to cover remaining distance to next vehicle
+    timesteps_away = trajectory_data.closest_approach / trajectory_data.avg_speed
+
+    #timesteps remaining is more than desired buffer timesteps
+    if timesteps_away > DESIRED_BUFFER:
+        return 0.0
+
+    #define cost function
+    cost = 1.0 - (timesteps_away / DESIRED_BUFFER) ** 2
+    return cost * DANGER
+
+def inefficiency_cost(vehicle, trajectory, predictions, trajectory_data):
+    speed_diff = (vehicle.target_speed - trajectory_data.avg_speed)
+    cost = (float(speed_diff) / vehicle.target_speed) ** 2
+
+    return cost * EFFICIENCY
+
 def calculate_cost(vehicle, trajectory, predictions):
+    #calculate some common helper data for cost functions
     data = get_helper_data(vehicle, trajectory, predictions)
-    print("Helper data: ", data)
-    #TODO: implement
-    return 0
+    #all of our cost functions
+    cfs = [lane_change_cost, distance_to_goal_lane, collision_cost, buffer_cost, inefficiency_cost]
+
+    cost = 0.0
+    #go through each cost function and find cost
+    for cf in cfs:
+        new_cost = cf(vehicle, trajectory, predictions, data)
+        cost += new_cost
+
+    return cost
 
 """
 Calculates helper TrajectoryData(
@@ -44,7 +136,7 @@ def get_helper_data(vehicle, trajectory, predictions):
 	#state starts from trajectory[1]
     current_state_snapshot = t[0]
 
-    first_snapshot = t[0]
+    first_snapshot = t[1]
     last_snapshot = t[-1]
 
     #lane in which vehicle starts this trajectory
@@ -53,7 +145,7 @@ def get_helper_data(vehicle, trajectory, predictions):
     #calculate distance from goal_s after this trajectory is taken
     end_distance_to_goal = vehicle.goal_s - last_snapshot.s
     #calculate distance from goal_lane after this trajectory is taken
-    end_lanes_from_goal = vehicle.goal_lane - last_snapshot.lane
+    end_lanes_from_goal = abs(vehicle.goal_lane - last_snapshot.lane)
 
     #calculate ego vehicle's avg speed during this trajectory
     #for calculating speed, we need timestes count which is same
@@ -87,7 +179,7 @@ def get_helper_data(vehicle, trajectory, predictions):
             v_pred_previous = v_preds[i-1]
 
             #check if collision is possible
-            if check_collision(vehicle, v_pred_previous['s'], v_pred_now['s']):
+            if check_collision(snapshot, v_pred_previous['s'], v_pred_now['s']):
                 collides = True
                 collides = {"at": i}
 
@@ -105,14 +197,14 @@ def get_helper_data(vehicle, trajectory, predictions):
     max_acceleration = max(accels, key=lambda a: abs(a))
     #calculate root means squared acceleration
     sqaured_a = [a**2 for a in accels]
-    mean_sqaured_a = sum(sqaured_a) / len(sqaured_a)
-    root_mean_squared_a = sqrt(mean_sqaured_a)
+    mean_squared_a = float(sum(sqaured_a)) / len(sqaured_a)
+    root_mean_squared_a = sqrt(mean_squared_a)
 
     return TrajectoryData(
         proposed_lane,
         avg_speed,
         max_acceleration,
-        mean_sqaured_a,
+        mean_squared_a,
         closest_approach,
         end_distance_to_goal,
         end_lanes_from_goal,
@@ -127,7 +219,7 @@ def check_collision(ego_vehicle, other_vehicle_s_previous, other_vehicle_s_now):
 
     #calculate other vehicle speed
     #which is: (s_previous - s_now)/dt but as dt=1 so
-    other_vehicle_v = other_vehicle_s_now - other_vehicle_s_now
+    other_vehicle_v = other_vehicle_s_now - other_vehicle_s_previous
 
     #There are 3 cases in which vehicle can collide
 
