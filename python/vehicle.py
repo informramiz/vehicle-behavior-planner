@@ -59,7 +59,8 @@ class Vehicle(object):
     }
 
     """
-
+    state = self.get_next_state(predictions)
+    self.state = state
     # self.state = "KL" # this is an example of how you change state.
 
   """
@@ -78,11 +79,13 @@ class Vehicle(object):
           states.remove("LCR")
 
       #let's calculate cost for each state
-      costs = {}
+      costs = []
       for state in states:
+          #make a copy of predictions as find_trajectory_for_state changes
+          #predictions
+          predictions_copy = deepcopy(predictions)
           #find trajectory to go take this state
-          #TODO implement method
-          trajectory = find_trajectory_for_state(state, predictions)
+          trajectory = self.find_trajectory_for_state(state, predictions_copy)
 
           #calculate cost for this trajectory
           cost = calculate_cost(self, trajectory, predictions)
@@ -101,7 +104,7 @@ class Vehicle(object):
   """
   def find_trajectory_for_state(self, state, predictions, horizon=5):
       #save current state snapshot
-      current_state_snapshot = take_snapshot()
+      current_state_snapshot = self.take_snapshot()
 
       #pretend to be in given state
       self.state = state
