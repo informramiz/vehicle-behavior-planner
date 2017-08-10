@@ -47,10 +47,10 @@ public:
   //Safety:
   const double COLLISION;
   const double DANGER;
-  //COMFORT
-  const double COMFORT;
   //Reach goal
   const double REACH_GOAL;
+  //COMFORT
+  const double COMFORT;
   //Efficiency
   const double EFFICIENCY;
 
