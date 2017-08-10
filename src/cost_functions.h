@@ -1,5 +1,7 @@
 /*
  * cost_functions.h
+ *  Class responsible for calculating cost for given trajectory, based on predictions and ego
+ *  vehicle state.
  *
  *  Created on: Aug 10, 2017
  *      Author: ramiz
@@ -20,7 +22,17 @@ class CostFunctions {
 public:
   CostFunctions();
   virtual ~CostFunctions();
+
+  /**
+   * @param vehicle, Ego vehicle for which to calculate cost of trajectory
+   * @param predictions,  predicted trajectories of other nearby vehicles on road
+   * @param trajectory,   trajectory for which to calculate cost of
+   */
   double CalculateCost(const Vehicle &vehicle, map<int, vector<vector<int> > > &predictios, vector<Snapshot> &trajectory);
+
+  /*
+   * Constants
+   */
 
   //time horizon based on which we want to decide
   //cost of trajectory
