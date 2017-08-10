@@ -15,6 +15,7 @@
 #include <iterator>
 #include "vehicle.h"
 #include "snapshot.h"
+#include "trajectory_data.h"
 
 using namespace std;
 
@@ -28,7 +29,9 @@ public:
    * @param predictions,  predicted trajectories of other nearby vehicles on road
    * @param trajectory,   trajectory for which to calculate cost of
    */
-  double CalculateCost(const Vehicle &vehicle, map<int, vector<vector<int> > > &predictios, vector<Snapshot> &trajectory);
+  double CalculateCost(const Vehicle &vehicle,
+                       const map<int, vector<vector<int> > > &predictios,
+                       const vector<Snapshot> &trajectory);
 
   /*
    * Constants
