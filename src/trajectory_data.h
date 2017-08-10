@@ -1,0 +1,38 @@
+/*
+ * trajectory_data.h
+ *
+ *  Created on: Aug 10, 2017
+ *      Author: ramiz
+ */
+
+#ifndef TRAJECTORY_DATA_H_
+#define TRAJECTORY_DATA_H_
+
+/**
+ * A passive object to hold helpful data extracted from trajectory
+ * when calculating cost for given trajectory
+ */
+struct TrajectoryData {
+  //proposed lane for new trajectory
+  int proposed_lane;
+  //avg speed for given trajectory
+  double avg_speed;
+  //max acceleration for given trajectory
+  double max_acceleration;
+  //mean squared acceleration for given trajectory
+  double mean_squared_acceleration;
+  //double distance to closes vehicle, we have to keep a buffer distance other traffic
+  double closest_approach;
+  //when this trajectory is taken, how much distance from goal position will be left
+  //at the end of this trajectory
+  double end_distance_to_goal;
+  //at the end of new trajectory how far is the lane vehicle is in from goal lane
+  int end_distance_from_goal_lane;
+  //flag for collision detection
+  bool is_collision_detected;
+  //variable to hold timestep at which collision happens, if any
+  int collides_at;
+};
+
+
+#endif /* TRAJECTORY_DATA_H_ */
