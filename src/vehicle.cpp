@@ -69,6 +69,29 @@ void Vehicle::update_state(map<int, vector<vector<int> > > predictions) {
 
 }
 
+/**
+   * Takes snapshot of current state of vehicle and saves it into snapshot object
+   * @return  Snapshot object containing current state of vehicle
+   */
+  Snapshot Vehicle::take_current_state_snapshot() {
+    return new Snapshot(this->lane,
+        this->s,
+        this->v,
+        this->a,
+        this->state);
+  }
+  /**
+   * Sets current state of vehicle to that of saved in passed snapshot
+   * @param snapshot  snapshot containing state of vehicle to restore from
+   */
+  void Vehicle::restore_state_from_snapshot(const Snapshot& snapshot) {
+    this->lane = snapshot.lane;
+    this->s = snapshot.s;
+    this->v = snapshot.v;
+    this->a = snapshot.a;
+    this->state = snapshot.state;
+  }
+
 void Vehicle::configure(vector<int> road_data) {
   /*
    Called by simulator before simulation begins. Sets various

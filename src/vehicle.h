@@ -17,6 +17,7 @@
 #include <map>
 #include <string>
 #include <iterator>
+#include "snapshot.h"
 
 using namespace std;
 
@@ -94,6 +95,18 @@ public:
                                 string direction);
 
   vector<vector<int> > generate_predictions(int horizon);
+
+private:
+  /**
+   * Takes snapshot of current state of vehicle and saves it into snapshot object
+   * @return  Snapshot object containing current state of vehicle
+   */
+  Snapshot take_current_state_snapshot();
+  /**
+   * Sets current state of vehicle to that of saved in passed snapshot
+   * @param snapshot  snapshot containing state of vehicle to restore from
+   */
+  void restore_state_from_snapshot(const Snapshot& snapshot);
 
 };
 
