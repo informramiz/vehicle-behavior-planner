@@ -53,6 +53,10 @@ struct TrajectoryData {
     this->is_collision_detected = is_collision_detected;
     this->collides_at = collides_at;
   }
+
+  TrajectoryData() {
+
+  }
 };
 
 
