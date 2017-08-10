@@ -8,8 +8,8 @@
 #include "cost_functions.h"
 
 CostFunctions::CostFunctions()
-  : COLLISION(pow(10, 6)), DANGER(pow(10, 5)), REACH_GOAL(pow(10, 5)),
-    COMFORT(pow(10, 4)), EFFICIENCY(pow(10, 2)){
+: COLLISION(pow(10, 6)), DANGER(pow(10, 5)), REACH_GOAL(pow(10, 5)),
+  COMFORT(pow(10, 4)), EFFICIENCY(pow(10, 2)) {
 
 }
 
