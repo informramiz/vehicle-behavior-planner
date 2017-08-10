@@ -182,8 +182,6 @@ Calculates helper TrajectoryData(
 	collides)
 """
 def get_helper_data(vehicle,trajectory,predictions):
-	print("trajectory: ",  trajectory)
-
 	#REMEMBER: trajectory[0] is current state (lane, s, v, a, state)
 	#of vehicle and not predicted trajectory state. Predicted trajectory
 	#state starts from trajectory[1]
@@ -300,6 +298,7 @@ def check_collision(snapshot, s_previous, s_now):
 	v = snapshot.v
 	#calculate speed of other vehicle based its predicted current s (s_now)
 	#and predicted previous s (s_previous)
+	#as timestes count is 1 between two states so ignoring dt
 	v_target = s_now - s_previous
 
 	#CASE: Other vehicle might be accelerating
@@ -324,9 +323,10 @@ def check_collision(snapshot, s_previous, s_now):
 		else:
 			return False
 
-	#CASE: If other vehicle's s_previous was same as current vehicle's `s`
+	#CASE: If other vehicle's s_previous was same as current vehicle's `s_now`
 	#then if other vehicle's speed is greater than current vehicle's speed
-	#then collision can be avoided, otherwise both will collide
+	#then collision can be avoided, otherwise ego vehicle will reach other vehicle
+	#both will collide
 	if s_previous == s:
 		if v_target > v:
 			return False

@@ -4,17 +4,17 @@ from road import Road
 import time
 
 # impacts default behavior for most states
-SPEED_LIMIT       = 10 
+SPEED_LIMIT       = 10
 
 # all traffic in lane (besides ego) follow these speeds
-LANE_SPEEDS       = [6,7,8,9] 
+LANE_SPEEDS       = [6,7,8,9]
 
 # LANE_SPEEDS       = [5,6,7,8]
 
 # Number of available "cells" which should have traffic
 TRAFFIC_DENSITY   = 0.15
 
-# At each timestep, ego can set acceleration to value between 
+# At each timestep, ego can set acceleration to value between
 # -MAX_ACCEL and MAX_ACCEL
 MAX_ACCEL         = 2
 
@@ -39,7 +39,7 @@ def main():
 	timestep = 0
 	while road.get_ego().s <= GOAL[0]:
 		timestep += 1
-		if timestep > 150: 
+		if timestep > 150:
 			print ("Taking too long to reach goal. Go faster!")
 			break
 		road.advance()

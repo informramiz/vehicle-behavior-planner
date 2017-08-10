@@ -89,6 +89,8 @@ class Vehicle(object):
       #find trajectory for this state
       trajectory = self._trajectory_for_state(state, predictions_copy)
 
+      print("Trajectory for state {} is {}".format(state, trajectory))
+
       #calculate cost for moving to current state using found trajectory
       cost = calculate_cost(self, trajectory, predictions)
       costs.append({"state": state, "cost" : cost})
@@ -98,7 +100,7 @@ class Vehicle(object):
     return best['state']
 
   """
-  finds trajectory (sequence of behavior changes for given time horizon)
+  finds trajectory (sequence of behavior (lane, s, v, a, state) changes for given time horizon)
   for passed @param state and based on first 5 other vehicle predictions,
   for given time horizon (by default, horizon=5)
   and based on passed predictions
