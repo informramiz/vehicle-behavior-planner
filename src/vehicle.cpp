@@ -139,7 +139,7 @@ string Vehicle::display() {
   return oss.str();
 }
 
-void Vehicle::increment(int dt = 1) {
+void Vehicle::increment(int dt) {
 
   this->s += this->v * dt;
   this->v += this->a * dt;
