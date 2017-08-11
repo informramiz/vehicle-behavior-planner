@@ -164,10 +164,13 @@ void Vehicle::remove_first_prediction_for_each(map<int, vector<vector<int> > > &
 
   while (iter != predictions.end()) {
     //map value (second element in iterator) is vector with each vector value a vector: [s, lane]
-    vector<vector<int> > v_preds = iter->second;
+    //take a reference to this second vector object so that we can update it
+    vector<vector<int> > &v_preds = iter->second;
 
     //remove first vector of this prediction
     v_preds.erase(v_preds.begin());
+
+    //move to next vehicle predictions
     iter++;
   }
 }
