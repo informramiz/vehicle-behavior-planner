@@ -99,7 +99,7 @@ public:
 private:
   /**
    * Takes snapshot of current state of vehicle and saves it into snapshot object
-   * @return  Snapshot object containing current state of vehicle
+   * @returns  Snapshot object containing current state of vehicle
    */
   Snapshot take_current_state_snapshot();
   /**
@@ -107,6 +107,23 @@ private:
    * @param snapshot  snapshot containing state of vehicle to restore from
    */
   void restore_state_from_snapshot(const Snapshot& snapshot);
+
+  /**
+   * @param predictions,  map of predictions of other vehicle's predicted trajectories
+   * @returns   new state for vehicle based on predictions of other vehicles given
+   */
+  string get_state(const map<int, vector<vector<int> > > &predictions);
+
+  /**
+   * @param state, state for which trajectory to calculate
+   * @param predictions, map of predictions of other vehicle's predicted trajectories
+   * @returns Returns trajectory to for reaching given state
+   */
+  vector<Snapshot> trajectory_for_state(const string &state,
+      const map<int, vector<vector<int> > > &predictions,
+      int horizon = 5);
+
+  void remove_first_prediction_for_each(map<int, vector<vector<int> > > &predictions);
 
 };
 

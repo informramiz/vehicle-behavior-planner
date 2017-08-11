@@ -5,13 +5,15 @@
  *      Author: ramiz
  */
 
+#include <cassert>
 #include <iostream>
+#include <algorithm>
 #include "vehicle.h"
-#include <iostream>
 #include <math.h>
 #include <map>
 #include <string>
 #include <iterator>
+#include "cost_functions.h"
 
 /**
  * Initializes Vehicle
@@ -65,32 +67,110 @@ void Vehicle::update_state(map<int, vector<vector<int> > > predictions) {
    }
 
    */
-  state = "KL"; // this is an example of how you change state.
-
+  state = get_state(predictions);
 }
 
 /**
-   * Takes snapshot of current state of vehicle and saves it into snapshot object
-   * @return  Snapshot object containing current state of vehicle
-   */
-  Snapshot Vehicle::take_current_state_snapshot() {
-    return new Snapshot(this->lane,
-        this->s,
-        this->v,
-        this->a,
-        this->state);
+ * @returns new state for vehicle based on predictions of other vehicles given
+ */
+string Vehicle::get_state(const map<int, vector<vector<int> > > &predictions) {
+  vector<string> possible_states = {"KL", "LCL", "LCR"};
+
+  //check if we are in left-most-lane
+  if (this->lane == 0) {
+    //we are in left-most lane so Lane Change Left (LCL)
+    //is not possible, remove it from possible states
+    possible_states.erase(possible_states.begin() + 1);
   }
-  /**
-   * Sets current state of vehicle to that of saved in passed snapshot
-   * @param snapshot  snapshot containing state of vehicle to restore from
-   */
-  void Vehicle::restore_state_from_snapshot(const Snapshot& snapshot) {
-    this->lane = snapshot.lane;
-    this->s = snapshot.s;
-    this->v = snapshot.v;
-    this->a = snapshot.a;
-    this->state = snapshot.state;
+
+  //check if we are in right most lane
+  if (this->lane == (this->lanes_available - 1)) {
+    //we are in right-most lane so Lane Change Left (LCR)
+    //is not possible, remove it from possible states
+    possible_states.erase(possible_states.begin() + 2);
   }
+
+  vector<double> costs;
+  CostFunctions cost_functions;
+  for(int i = 0; i < possible_states.size(); ++i) {
+    //find a rough trajectory to reach this state
+    vector<Snapshot> trajectory = trajectory_for_state(possible_states[i], predictions);
+    //find cost for found trajectory
+    double cost = cost_functions.CalculateCost(*this, predictions, trajectory);
+    costs.push_back(cost);
+  }
+
+  //find index of min cost which is also index of corresponding state
+  int min_cost_state_index = std::distance(costs.begin(), std::min_element(costs.begin(), costs.end()));
+
+  //return min cost state
+  return possible_states[min_cost_state_index];
+}
+
+/**
+ * @param state, state for which trajectory to calculate
+ * @param predictions, map of predictions of other vehicle's predicted trajectories
+ * @returns Returns trajectory to for reaching given state
+ */
+vector<Snapshot> Vehicle::trajectory_for_state(const string &state,
+                                               const map<int, vector<vector<int> > > &predictions,
+                                               int horizon) {
+  //make a copy of predictions are we are going to change it
+  map<int, vector<vector<int> > > predictions_copy = predictions;
+
+  //make a vector to hold trajectory
+  vector<Snapshot> trajectory;
+  //take snapshot of current vehicle state
+  Snapshot current_state_snapshot = take_current_state_snapshot();
+
+  //add current state snapshot to trajectory
+  trajectory.push_back(current_state_snapshot);
+
+  //for prediction time horizon
+  for (int i = 0; i < horizon; ++i) {
+    //reset vehicle state to its original state (current_state_snapshot)
+    restore_state_from_snapshot(current_state_snapshot);
+
+    //pretend to be in new (passed as param) state
+    this->state = state;
+
+    //update vehicle to passed state by changing (lane, a) based on given state and
+    //predictions of other vehicles
+    realize_state(predictions_copy);
+
+    //validate lane number
+    assert(0 <= this->lane && this->lane < this->lanes_available);
+
+    //update current vehicle (s, v) for delta_t=1, assuming constant acceleration
+    increment();
+
+    //add current state snapshot to trajectory
+    trajectory.push_back(take_current_state_snapshot());
+
+    //As one timestep has been finished so we
+    //need to remove first prediction for each vehicle
+    //so that all vehicles predictions start from the next timestep
+    remove_first_prediction_for_each(predictions_copy);
+  }
+
+  //reset state to original state (current_state_snapshot)
+  restore_state_from_snapshot(current_state_snapshot);
+
+  return trajectory;
+}
+
+void Vehicle::remove_first_prediction_for_each(map<int, vector<vector<int> > > &predictions) {
+  map<int, vector<vector<int> > >::iterator iter = predictions.begin();
+
+  while (iter != predictions.end()) {
+    //map value (second element in iterator) is vector with each vector value a vector: [s, lane]
+    vector<vector<int> > v_preds = iter->second;
+
+    //remove first vector of this prediction
+    v_preds.erase(v_preds.begin());
+    iter++;
+  }
+}
 
 /**
  * Takes snapshot of current state of vehicle and saves it into snapshot object
