@@ -70,20 +70,6 @@ void Vehicle::update_state(map<int, vector<vector<int> > > predictions) {
   state = get_state(predictions);
 }
 
-void print_first_prediction_count(const map<int, vector<vector<int> > > &predictions) {
-  map<int, vector<vector<int> > >::const_iterator itr = predictions.begin();
-
-  while (itr != predictions.end()) {
-    int v_id = itr->first;
-    vector<vector<int> > v_preds = itr->second;
-    printf("Vehicle with id %d has predictions count %ld \n", v_id, v_preds.size());
-
-    itr++;
-  }
-
-  cout << endl;
-}
-
 /**
  * @returns new state for vehicle based on predictions of other vehicles given
  */
