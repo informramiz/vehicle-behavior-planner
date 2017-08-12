@@ -65,3 +65,29 @@ bool CostFunctions::check_collision(const Snapshot& snapshot, int other_vehicle_
   return false;
 }
 
+/**
+ * Filter predictions and only keep predictions whose first prediction is in given lane
+ */
+map<int, vector<vector<int> > > CostFunctions::filter_predictions_by_lane(const map<int, vector<vector<int> > > &predictions,
+                                                                          int lane) {
+  map<int, vector<vector<int> > > filtered_preds;
+
+  map<int, vector<vector<int> > >::const_iterator preds_itr = predictions.begin();
+  while(preds_itr != predictions.end()) {
+    //map key is vehicle id
+    int v_id = preds_itr->first;
+    //map value is a list: [s, lane]
+    vector<vector<int> > v_preds = preds_itr->second;
+
+    //check first lane of each prediction and also make sure it not ego vehicle (ego vehicle has id -1)
+    if (v_preds[0][1] == lane && v_id != -1) {
+      filtered_preds[v_id] = v_preds;
+    }
+
+    //move to preds
+    preds_itr++;
+  }
+
+  return filtered_preds;
+}
+

@@ -56,6 +56,10 @@ public:
   const double EFFICIENCY;
 
 
+  /**
+   * Filter predictions and only keep predictions whose first prediction is in given lane
+   */
+  map<int, vector<vector<int> > > filter_predictions_by_lane(const map<int, vector<vector<int> > > &predictions, int lane);
 
   /**
    * Detects if there is a collision between two vehicles based on (s, v)
