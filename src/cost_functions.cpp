@@ -102,7 +102,7 @@ double CostFunctions::collision_cost(const Vehicle &vehicle,
     return 0;
   }
 
-  int exponent = pow(data.collides_at, 2);
+  int exponent = pow(data.timesteps_till_collision, 2);
   //increases if exponent is small or decreases if exponent is large
   //as we want more cost of time till collision is small
   double cost = exp(-exponent);

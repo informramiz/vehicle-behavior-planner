@@ -31,7 +31,7 @@ struct TrajectoryData {
   //flag for collision detection
   bool is_collision_detected;
   //variable to hold timestep at which collision happens, if any
-  int collides_at;
+  int timesteps_till_collision;
 
   TrajectoryData(int proposed_lane,
                  double avg_speed,
@@ -51,7 +51,7 @@ struct TrajectoryData {
     this->end_distance_to_goal = end_distance_to_goal;
     this->end_distance_from_goal_lane = end_distance_from_goal_lane;
     this->is_collision_detected = is_collision_detected;
-    this->collides_at = collides_at;
+    this->timesteps_till_collision = collides_at;
   }
 
   TrajectoryData() {
