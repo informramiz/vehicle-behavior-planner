@@ -34,8 +34,14 @@ vector<int> GOAL = { 300, 0 };
 int FRAMES_PER_SECOND = 4;
 int AMOUNT_OF_ROAD_VISIBLE = 40;
 
-int main() {
+void run_simulator();
 
+int main() {
+  run_simulator();
+  return 0;
+}
+
+void run_simulator() {
   Road road = Road(SPEED_LIMIT, TRAFFIC_DENSITY, LANE_SPEEDS);
 
   road.update_width = AMOUNT_OF_ROAD_VISIBLE;
@@ -56,7 +62,7 @@ int main() {
 
   while (road.get_ego().s <= GOAL[0]) {
     timestep++;
-    if (timestep > 150) {
+    if (timestep > 35) {
       cout << "Taking too long to reach goal. Go faster!" << endl;
       break;
     }
@@ -64,14 +70,17 @@ int main() {
     road.display(timestep);
     //time.sleep(float(1.0) / FRAMES_PER_SECOND);
   }
+
   Vehicle ego = road.get_ego();
   if (ego.lane == GOAL[1]) {
     cout << "You got to the goal in " << timestep << " seconds!" << endl;
+    if(timestep > 35)
+    {
+      cout << "But it took too long to reach the goal. Go faster!" << endl;
+    }
   } else {
     cout << "You missed the goal. You are in lane " << ego.lane
         << " instead of " << GOAL[1] << endl;
   }
-
-  return 0;
 }
 
