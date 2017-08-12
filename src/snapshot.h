@@ -29,6 +29,10 @@ struct Snapshot {
    this->a = a;
    this->state = state;
  }
+
+ void print() const{
+   printf("Lane %d, s %d, v %f, a %f, state %s \n", lane, s, v, a, state.c_str());
+ }
 };
 
 
