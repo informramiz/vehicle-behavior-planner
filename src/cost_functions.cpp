@@ -13,7 +13,8 @@ CostFunctions::CostFunctions()
   cost_functions_pointers = {&CostFunctions::change_lane_cost,
       &CostFunctions::distance_from_goal_lane_cost,
       &CostFunctions::inefficiency_cost,
-      &CostFunctions::collision_cost};
+      &CostFunctions::collision_cost,
+      &CostFunctions::buffer_cost};
 }
 
 CostFunctions::~CostFunctions() {
@@ -110,6 +111,34 @@ double CostFunctions::collision_cost(const Vehicle &vehicle,
   return cost * COLLISION;
 }
 
+/**
+ * Calculates cost based on how much buffer we have from other traffic
+ */
+double CostFunctions::buffer_cost(const Vehicle &vehicle,
+                   const map<int, vector<vector<int> > > &predictions,
+                   const vector<Snapshot> &trajectory,
+                   const TrajectoryData &data) {
+  //data.closest_approach is the distance we have to closest approach
+
+  if (data.closest_approach == 0) {
+    //there is no buffer left, danger close
+    return 10 * DANGER;
+  }
+
+  //calculate in how many timesteps we will cover the closet approach distance
+  //because we have defined buffer in terms of timesteps instead of distance
+  double timesteps_away = data.closest_approach / data.avg_speed;
+
+  if (timesteps_away > BUFFER_TIME) {
+    return 0.0;
+  }
+
+  //otherwise penalize based on how small are we timesteps_away from covering buffer distance
+  double cost = 1.0 - pow((timesteps_away / BUFFER_TIME), 2);
+
+  return cost * DANGER;
+}
+
 double CostFunctions::calculate_cost(const Vehicle &vehicle,
                                      const map<int, vector<vector<int> > > &predictions,
                                      const vector<Snapshot> &trajectory) {
@@ -117,7 +146,7 @@ double CostFunctions::calculate_cost(const Vehicle &vehicle,
 
   double cost = 0;
   for (int i = 0; i < cost_functions_pointers.size(); ++i) {
-    (this->*cost_functions_pointers[i])(vehicle, predictions, trajectory, data);
+    cost += (this->*cost_functions_pointers[i])(vehicle, predictions, trajectory, data);
   }
 
   return cost;

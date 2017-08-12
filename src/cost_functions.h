@@ -66,6 +66,15 @@ public:
                         const map<int, vector<vector<int> > > &predictions,
                         const vector<Snapshot> &trajectory,
                         const TrajectoryData &data);
+
+  /**
+   * Calculates cost based on how much buffer we have from other traffic
+   */
+  double buffer_cost(const Vehicle &vehicle,
+                     const map<int, vector<vector<int> > > &predictions,
+                     const vector<Snapshot> &trajectory,
+                     const TrajectoryData &data);
+
   /*
    * Constants
    */
