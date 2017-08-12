@@ -30,7 +30,7 @@ public:
    * @param predictions,  predicted trajectories of other nearby vehicles on road
    * @param trajectory,   trajectory for which to calculate cost of
    */
-  double CalculateCost(const Vehicle &vehicle,
+  double calculate_cost(const Vehicle &vehicle,
                        const map<int, vector<vector<int> > > &predictios,
                        const vector<Snapshot> &trajectory);
   /*

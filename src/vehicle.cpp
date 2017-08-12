@@ -96,7 +96,7 @@ string Vehicle::get_state(const map<int, vector<vector<int> > > &predictions) {
     //find a rough trajectory to reach this state
     vector<Snapshot> trajectory = trajectory_for_state(possible_states[i], predictions);
     //find cost for found trajectory
-    double cost = cost_functions.CalculateCost(*this, predictions, trajectory);
+    double cost = cost_functions.calculate_cost(*this, predictions, trajectory);
     costs.push_back(cost);
   }
 

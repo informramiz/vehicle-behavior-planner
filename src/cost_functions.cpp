@@ -17,7 +17,7 @@ CostFunctions::~CostFunctions() {
   // TODO
 }
 
-double CostFunctions::CalculateCost(const Vehicle &vehicle,
+double CostFunctions::calculate_cost(const Vehicle &vehicle,
                                     const map<int, vector<vector<int> > > &predictios,
                                     const vector<Snapshot> &trajectory) {
   calculate_helper_data(vehicle, predictios, trajectory);
