@@ -10,7 +10,7 @@
 CostFunctions::CostFunctions()
 : COLLISION(pow(10, 6)), DANGER(pow(10, 5)), REACH_GOAL(pow(10, 5)),
   COMFORT(pow(10, 4)), EFFICIENCY(pow(10, 2)) {
-
+  cost_functions_pointers = {&CostFunctions::change_lane_cost};
 }
 
 CostFunctions::~CostFunctions() {
@@ -50,11 +50,16 @@ double CostFunctions::change_lane_cost(const Vehicle &vehicle,
 }
 
 double CostFunctions::calculate_cost(const Vehicle &vehicle,
-                                    const map<int, vector<vector<int> > > &predictios,
-                                    const vector<Snapshot> &trajectory) {
-  calculate_helper_data(vehicle, predictios, trajectory);
-  //TODO
-  return 0;
+                                     const map<int, vector<vector<int> > > &predictios,
+                                     const vector<Snapshot> &trajectory) {
+  TrajectoryData data = calculate_helper_data(vehicle, predictios, trajectory);
+
+  double cost = 0;
+  for (int i = 0; i < cost_functions_pointers.size(); ++i) {
+    (this->*cost_functions_pointers[i])(vehicle, predictios, trajectory, data);
+  }
+
+  return cost;
 }
 
 /**
@@ -77,8 +82,8 @@ Calculates helper TrajectoryData(
                               containing some helpful results about trajectory given
  */
 TrajectoryData CostFunctions::calculate_helper_data(const Vehicle &vehicle,
-                                                  const map<int, vector<vector<int> > > &predictions,
-                                                  const vector<Snapshot> &trajectory) {
+                                                    const map<int, vector<vector<int> > > &predictions,
+                                                    const vector<Snapshot> &trajectory) {
 
   //REMEMBER: trajectory[0] is current state (lane, s, v, a, state)
   //of vehicle and not predicted trajectory state. Predicted trajectory
@@ -158,13 +163,13 @@ TrajectoryData CostFunctions::calculate_helper_data(const Vehicle &vehicle,
   //value and not sign so we will define a lambad function along with
   //STL's max_element function to compare absolute values
   double max_acceleration = *std::max_element(accelerations.begin(), accelerations.end(),
-                                             [](const double &lhs, const double &rhs) {
+                                              [](const double &lhs, const double &rhs) {
     return abs(lhs) < abs(rhs);
   });
 
   //calculate mean squared acceleration
   double squared_sum_acceleration = std::accumulate(accelerations.begin(), accelerations.end(), 0.0,
-                               [](const double &lhs, const double &rhs) {
+                                                    [](const double &lhs, const double &rhs) {
     //we need squared sum so sqaure each value
     return pow(lhs, 2) + pow(rhs, 2);
   });

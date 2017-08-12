@@ -62,13 +62,20 @@ public:
   //Efficiency
   const double EFFICIENCY;
 
+  typedef double (CostFunctions::* cost_function_ptr)(const Vehicle &,
+      const map<int, vector<vector<int> > > &,
+      const vector<Snapshot> &,
+      const TrajectoryData &);
+
+  vector<cost_function_ptr> cost_functions_pointers;
+
 private:
   /**
    * Calculates helper data needed for calculating cost functions
    */
   TrajectoryData calculate_helper_data(const Vehicle &vehicle,
-                                     const map<int, vector<vector<int> > > &predictios,
-                                     const vector<Snapshot> &trajectory);
+                                       const map<int, vector<vector<int> > > &predictios,
+                                       const vector<Snapshot> &trajectory);
 
   /**
    * Filter predictions and only keep predictions whose first prediction is in given lane
