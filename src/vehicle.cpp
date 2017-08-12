@@ -70,6 +70,20 @@ void Vehicle::update_state(map<int, vector<vector<int> > > predictions) {
   state = get_state(predictions);
 }
 
+void print_first_prediction_count(const map<int, vector<vector<int> > > &predictions) {
+  map<int, vector<vector<int> > >::const_iterator itr = predictions.begin();
+
+  while (itr != predictions.end()) {
+    int v_id = itr->first;
+    vector<vector<int> > v_preds = itr->second;
+    printf("Vehicle with id %d has predictions count %ld \n", v_id, v_preds.size());
+
+    itr++;
+  }
+
+  cout << endl;
+}
+
 /**
  * @returns new state for vehicle based on predictions of other vehicles given
  */
@@ -78,23 +92,25 @@ string Vehicle::get_state(const map<int, vector<vector<int> > > &predictions) {
 
   //check if we are in left-most-lane
   if (this->lane == 0) {
+    //we are in right-most lane so Lane Change Right (LCR)
+    //is not possible, remove it from possible states
+    possible_states.erase(possible_states.begin() + 2);
+  }
+
+  //check if we are in right most lane
+  if (this->lane == (this->lanes_available - 1)) {
     //we are in left-most lane so Lane Change Left (LCL)
     //is not possible, remove it from possible states
     possible_states.erase(possible_states.begin() + 1);
   }
 
-  //check if we are in right most lane
-  if (this->lane == (this->lanes_available - 1)) {
-    //we are in right-most lane so Lane Change Left (LCR)
-    //is not possible, remove it from possible states
-    possible_states.erase(possible_states.begin() + 2);
-  }
-
   vector<double> costs;
   CostFunctions cost_functions;
   for(int i = 0; i < possible_states.size(); ++i) {
+
     //find a rough trajectory to reach this state
     vector<Snapshot> trajectory = trajectory_for_state(possible_states[i], predictions);
+
     //find cost for found trajectory
     double cost = cost_functions.calculate_cost(*this, predictions, trajectory);
     costs.push_back(cost);
@@ -212,7 +228,7 @@ void Vehicle::configure(vector<int> road_data) {
   max_acceleration = road_data[4];
 }
 
-string Vehicle::display() {
+string Vehicle::display() const{
 
   ostringstream oss;
 
@@ -220,6 +236,8 @@ string Vehicle::display() {
   oss << "lane: " << this->lane << "\n";
   oss << "v:    " << this->v << "\n";
   oss << "a:    " << this->a << "\n";
+  oss << "goal s:    " << this->goal_s << "\n";
+  oss << "goal lane:    " << this->goal_lane << "\n";
 
   return oss.str();
 }

@@ -69,7 +69,7 @@ public:
 
   void configure(vector<int> road_data);
 
-  string display();
+  string display() const;
 
   void increment(int dt=1);
 
