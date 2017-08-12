@@ -20,6 +20,7 @@
 using namespace std;
 
 class CostFunctions {
+
 public:
   CostFunctions();
   virtual ~CostFunctions();
@@ -55,6 +56,11 @@ public:
   const double EFFICIENCY;
 
 
+
+  /**
+   * Detects if there is a collision between two vehicles based on (s, v)
+   */
+  bool check_collision(const Snapshot& snapshot, int other_vehicle_s_now, int other_vehicle_s_previous);
 };
 
 #endif /* COST_FUNCTIONS_H_ */
