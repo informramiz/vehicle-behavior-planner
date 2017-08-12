@@ -39,8 +39,8 @@ struct TrajectoryData {
                  double mean_squared_acceleration,
                  double closes_approach,
                  double end_distance_to_goal,
-                 double end_distance_from_goal_lane,
-                 double is_collision_detected,
+                 int end_distance_from_goal_lane,
+                 bool is_collision_detected,
                  int collides_at) {
 
     this->proposed_lane = proposed_lane;
