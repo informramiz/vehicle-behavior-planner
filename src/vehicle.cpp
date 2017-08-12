@@ -202,12 +202,14 @@ void Vehicle::configure(vector<int> road_data) {
   /*
    Called by simulator before simulation begins. Sets various
    parameters which will impact the ego vehicle.
+   vector<int> ego_config = { SPEED_LIMIT, num_lanes, goal_s, goal_lane,
+        MAX_ACCEL };
    */
   target_speed = road_data[0];
   lanes_available = road_data[1];
-  max_acceleration = road_data[2];
+  goal_s = road_data[2];
   goal_lane = road_data[3];
-  goal_s = road_data[4];
+  max_acceleration = road_data[4];
 }
 
 string Vehicle::display() {
