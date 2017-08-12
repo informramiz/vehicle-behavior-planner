@@ -17,6 +17,38 @@ CostFunctions::~CostFunctions() {
   // TODO
 }
 
+/**
+ * Calculates cost for changing lane based on trajectory data and predictions
+ */
+double CostFunctions::change_lane_cost(const Vehicle &vehicle,
+                                      const map<int, vector<vector<int> > > &predictios,
+                                      const vector<Snapshot> &trajectory,
+                                      const TrajectoryData &data) {
+  //as trajectory[0] is current state of vehicle and not predicted state
+  //and data.proposed_lane is the lane for which we needs to calculate cost for
+
+  double cost = 0;
+  //check if new proposed lane is far from goal lane, as compared to current lane
+  // is to goal lane
+  if (data.end_distance_from_goal_lane >  trajectory[0].lane) {
+    //penalize as we want to stay close to goal lane
+    cost = COMFORT;
+  }
+
+  //check if new proposed lane is close to goal lane, as compared to current lane
+  // is to goal lane
+  if (data.end_distance_from_goal_lane >  trajectory[0].lane) {
+    //reward as we want to stay close to goal lane
+    cost = -COMFORT;
+  }
+
+  if (cost != 0) {
+    printf("!! \n \ncost for lane change is %f\n\n", cost);
+  }
+
+  return cost;
+}
+
 double CostFunctions::calculate_cost(const Vehicle &vehicle,
                                     const map<int, vector<vector<int> > > &predictios,
                                     const vector<Snapshot> &trajectory) {

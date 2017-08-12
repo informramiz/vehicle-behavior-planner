@@ -31,8 +31,16 @@ public:
    * @param trajectory,   trajectory for which to calculate cost of
    */
   double calculate_cost(const Vehicle &vehicle,
-                       const map<int, vector<vector<int> > > &predictios,
-                       const vector<Snapshot> &trajectory);
+                        const map<int, vector<vector<int> > > &predictios,
+                        const vector<Snapshot> &trajectory);
+
+  /**
+   * Calculates cost for changing lane based on trajectory data and predictions
+   */
+  double change_lane_cost(const Vehicle &vehicle,
+                         const map<int, vector<vector<int> > > &predictios,
+                         const vector<Snapshot> &trajectory,
+                         const TrajectoryData &data);
   /*
    * Constants
    */
