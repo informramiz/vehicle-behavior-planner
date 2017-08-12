@@ -50,13 +50,13 @@ double CostFunctions::change_lane_cost(const Vehicle &vehicle,
 }
 
 double CostFunctions::calculate_cost(const Vehicle &vehicle,
-                                     const map<int, vector<vector<int> > > &predictios,
+                                     const map<int, vector<vector<int> > > &predictions,
                                      const vector<Snapshot> &trajectory) {
-  TrajectoryData data = calculate_helper_data(vehicle, predictios, trajectory);
+  TrajectoryData data = calculate_helper_data(vehicle, predictions, trajectory);
 
   double cost = 0;
   for (int i = 0; i < cost_functions_pointers.size(); ++i) {
-    (this->*cost_functions_pointers[i])(vehicle, predictios, trajectory, data);
+    (this->*cost_functions_pointers[i])(vehicle, predictions, trajectory, data);
   }
 
   return cost;
