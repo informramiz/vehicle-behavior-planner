@@ -205,25 +205,24 @@ TrajectoryData CostFunctions::calculate_helper_data(const Vehicle &vehicle,
   vector<double> accelerations;
 
   for (int i = 1; i < PLANNING_HORIZON + 1; ++i) {
-
     //save acceleration value for current trajectory snapshot
     accelerations.push_back(trajectory[i].a);
 
-    map<int, vector<vector<int> > >::const_iterator preds_itr = predictions.begin();
-    while (preds_itr != predictions.end()) {
+    map<int, vector<vector<int> > >::iterator preds_itr = filtered_preds.begin();
+    while (preds_itr != filtered_preds.end()) {
       //map key is vehicle id
       int v_id = preds_itr->first;
-      //map value is a list: [s, lane]
-      vector<vector<int> > predictions = preds_itr->second;
+      //map value is a list: [lane, s]
+      vector<vector<int> > v_predictions = preds_itr->second;
 
       //extract other vehicle's prediction corresponding to current timestep i
-      vector<int> pred_now = predictions[i];
+      vector<int> pred_now = v_predictions[i];
       //extract previous prediction
-      vector<int> pred_previous = predictions[i-1];
+      vector<int> pred_previous = v_predictions[i-1];
 
       //check if there is a collision between current trajectory snapshot of vehicle and
       //other vehicle
-      if(check_collision(trajectory[i], pred_now[0], pred_previous[0])) {
+      if(check_collision(trajectory[i], pred_now[1], pred_previous[1])) {
         //mark collision timestep
         is_collision_detected = true;
         collision_detected_at_timestep = i;
@@ -231,7 +230,7 @@ TrajectoryData CostFunctions::calculate_helper_data(const Vehicle &vehicle,
 
       //find distance between ego vehicle's current snapshot and other vehicle's
       //corresponding prediction
-      int distance = abs(pred_now[0] - trajectory[i].s);
+      int distance = abs(pred_now[1] - trajectory[i].s);
 
       //check if this distance is less than other closest approach
       //distance that we already have, we need to keep track of closest distance to any vehicle
