@@ -327,11 +327,11 @@ map<int, vector<vector<int> > > CostFunctions::filter_predictions_by_lane(const 
   while(preds_itr != predictions.end()) {
     //map key is vehicle id
     int v_id = preds_itr->first;
-    //map value is a list: [s, lane]
+    //map value is a list: [lane, s]
     vector<vector<int> > v_preds = preds_itr->second;
 
     //check first lane of each prediction and also make sure it not ego vehicle (ego vehicle has id -1)
-    if (v_preds[0][1] == lane && v_id != -1) {
+    if (v_preds[0][0] == lane && v_id != -1) {
       filtered_preds[v_id] = v_preds;
     }
 
