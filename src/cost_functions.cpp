@@ -37,11 +37,7 @@ double CostFunctions::change_lane_cost(const Vehicle &vehicle,
   if (data.end_distance_from_goal_lane >  trajectory[0].lane) {
     //penalize as we want to stay close to goal lane
     cost = COMFORT;
-  }
-
-  //check if new proposed lane is close to goal lane, as compared to current lane
-  // is to goal lane
-  if (data.end_distance_from_goal_lane >  trajectory[0].lane) {
+  } else {
     //reward as we want to stay close to goal lane
     cost = -COMFORT;
   }
