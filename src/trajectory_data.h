@@ -54,8 +54,10 @@ struct TrajectoryData {
     this->timesteps_till_collision = collides_at;
   }
 
-  TrajectoryData() {
-
+  void print() {
+    printf("proposed_lane %d, avg_speed %f, max_a %f, ms_a %f, closest_approach %f, end_dist_goal %f, end_dist_lane %d, collision %d, c_at %d",
+        proposed_lane, avg_speed, max_acceleration, mean_squared_acceleration, closest_approach,
+        end_distance_to_goal, end_distance_from_goal_lane, is_collision_detected, timesteps_till_collision);
   }
 };
 
