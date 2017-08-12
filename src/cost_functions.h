@@ -59,6 +59,13 @@ public:
                            const vector<Snapshot> &trajectory,
                            const TrajectoryData &data);
 
+  /**
+   * Calculates cost based on whether collision is detected or not
+   */
+  double collision_cost(const Vehicle &vehicle,
+                        const map<int, vector<vector<int> > > &predictions,
+                        const vector<Snapshot> &trajectory,
+                        const TrajectoryData &data);
   /*
    * Constants
    */

@@ -12,7 +12,8 @@ CostFunctions::CostFunctions()
   COMFORT(pow(10, 4)), EFFICIENCY(pow(10, 2)) {
   cost_functions_pointers = {&CostFunctions::change_lane_cost,
       &CostFunctions::distance_from_goal_lane_cost,
-      &CostFunctions::inefficiency_cost};
+      &CostFunctions::inefficiency_cost,
+      &CostFunctions::collision_cost};
 }
 
 CostFunctions::~CostFunctions() {
@@ -88,6 +89,25 @@ double CostFunctions::inefficiency_cost(const Vehicle &vehicle,
                                         const TrajectoryData &data) {
   double cost = (vehicle.target_speed - data.avg_speed) / vehicle.target_speed;
   return pow(cost, 2) * EFFICIENCY;
+}
+
+/**
+ * Calculates cost based on whether collision is detected or not
+ */
+double CostFunctions::collision_cost(const Vehicle &vehicle,
+                      const map<int, vector<vector<int> > > &predictions,
+                      const vector<Snapshot> &trajectory,
+                      const TrajectoryData &data) {
+  if (!data.is_collision_detected) {
+    return 0;
+  }
+
+  int exponent = pow(data.collides_at, 2);
+  //increases if exponent is small or decreases if exponent is large
+  //as we want more cost of time till collision is small
+  double cost = exp(-exponent);
+
+  return cost * COLLISION;
 }
 
 double CostFunctions::calculate_cost(const Vehicle &vehicle,
