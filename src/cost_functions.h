@@ -33,7 +33,6 @@ public:
   double CalculateCost(const Vehicle &vehicle,
                        const map<int, vector<vector<int> > > &predictios,
                        const vector<Snapshot> &trajectory);
-
   /*
    * Constants
    */
@@ -55,6 +54,13 @@ public:
   //Efficiency
   const double EFFICIENCY;
 
+private:
+  /**
+   * Calculates helper data needed for calculating cost functions
+   */
+  TrajectoryData calculate_helper_data(const Vehicle &vehicle,
+                                     const map<int, vector<vector<int> > > &predictios,
+                                     const vector<Snapshot> &trajectory);
 
   /**
    * Filter predictions and only keep predictions whose first prediction is in given lane
