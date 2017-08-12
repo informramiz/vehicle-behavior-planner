@@ -41,6 +41,15 @@ public:
                          const map<int, vector<vector<int> > > &predictions,
                          const vector<Snapshot> &trajectory,
                          const TrajectoryData &data);
+
+  /**
+   * Calculates cost for how far we are from goal lane and based on
+   * in howmany timesteps we will reach to goal position.
+   */
+  double distance_from_goal_lane_cost(const Vehicle &vehicle,
+                                      const map<int, vector<vector<int> > > &predictions,
+                                      const vector<Snapshot> &trajectory,
+                                      const TrajectoryData &data);
   /*
    * Constants
    */

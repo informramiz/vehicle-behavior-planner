@@ -10,7 +10,8 @@
 CostFunctions::CostFunctions()
 : COLLISION(pow(10, 6)), DANGER(pow(10, 5)), REACH_GOAL(pow(10, 5)),
   COMFORT(pow(10, 4)), EFFICIENCY(pow(10, 2)) {
-  cost_functions_pointers = {&CostFunctions::change_lane_cost};
+  cost_functions_pointers = {&CostFunctions::change_lane_cost,
+      &CostFunctions::distance_from_goal_lane_cost};
 }
 
 CostFunctions::~CostFunctions() {
@@ -21,9 +22,9 @@ CostFunctions::~CostFunctions() {
  * Calculates cost for changing lane based on trajectory data and predictions
  */
 double CostFunctions::change_lane_cost(const Vehicle &vehicle,
-                                      const map<int, vector<vector<int> > > &predictios,
-                                      const vector<Snapshot> &trajectory,
-                                      const TrajectoryData &data) {
+                                       const map<int, vector<vector<int> > > &predictios,
+                                       const vector<Snapshot> &trajectory,
+                                       const TrajectoryData &data) {
   //as trajectory[0] is current state of vehicle and not predicted state
   //and data.proposed_lane is the lane for which we needs to calculate cost for
 
@@ -45,6 +46,34 @@ double CostFunctions::change_lane_cost(const Vehicle &vehicle,
   if (cost != 0) {
     printf("!! \n \ncost for lane change is %f\n\n", cost);
   }
+
+  return cost;
+}
+
+/**
+ * Calculates cost for how far we are from goal lane and based on
+ * in how many timesteps we will reach to goal position.
+ */
+double CostFunctions::distance_from_goal_lane_cost(const Vehicle &vehicle,
+                                                   const map<int, vector<vector<int> > > &predictions,
+                                                   const vector<Snapshot> &trajectory,
+                                                   const TrajectoryData &data) {
+
+  //we don't want distance below 1.0, so if it less then pick 1.0
+  int distance = std::max(data.end_distance_from_goal_lane, 1);
+
+  //calculate in how many timesteps we will reach goal position
+  //given that we know avg_speed of vehicle
+  double timesteps_away = data.end_distance_to_goal / data.avg_speed;
+  //find a cost function (multiplier) value based distance from goal_lane and time to reach goal_lane
+  //it should be in way so that if time_to_goal is greater then multiplier is less
+  //otherwise bigger and vice versal for distance to goal_lane (lanes)
+  //as distance from goal lane is a small value so multiply it with a constant
+  //to normalize it with timesteps value
+  double cost = (5.0 * distance) / timesteps_away;
+
+  //multiple cost with its weight
+  cost *= REACH_GOAL;
 
   return cost;
 }
