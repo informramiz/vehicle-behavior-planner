@@ -278,7 +278,7 @@ TrajectoryData CostFunctions::calculate_helper_data(const Vehicle &vehicle,
 /**
  * Detects if there is a collision between two vehicles based on (s, v)
  */
-bool CostFunctions::check_collision(const Snapshot& snapshot, int other_vehicle_s_now, int other_vehicle_s_previous) {
+bool CostFunctions::check_collision(const Snapshot &snapshot, int other_vehicle_s_now, int other_vehicle_s_previous) {
   //calculate other vehicle speed
   //which is: (s_previous - s_now)/dt but as dt=1 so
   double other_vehicle_v = other_vehicle_s_now - other_vehicle_s_previous;
