@@ -11,7 +11,8 @@ CostFunctions::CostFunctions()
 : COLLISION(pow(10, 6)), DANGER(pow(10, 5)), REACH_GOAL(pow(10, 5)),
   COMFORT(pow(10, 4)), EFFICIENCY(pow(10, 2)) {
   cost_functions_pointers = {&CostFunctions::change_lane_cost,
-      &CostFunctions::distance_from_goal_lane_cost};
+      &CostFunctions::distance_from_goal_lane_cost,
+      &CostFunctions::inefficiency_cost};
 }
 
 CostFunctions::~CostFunctions() {
@@ -76,6 +77,17 @@ double CostFunctions::distance_from_goal_lane_cost(const Vehicle &vehicle,
   cost *= REACH_GOAL;
 
   return cost;
+}
+
+/**
+ * Calculates cost based on how far vehicle's velocity is from target velocity
+ */
+double CostFunctions::inefficiency_cost(const Vehicle &vehicle,
+                                        const map<int, vector<vector<int> > > &predictions,
+                                        const vector<Snapshot> &trajectory,
+                                        const TrajectoryData &data) {
+  double cost = (vehicle.target_speed - data.avg_speed) / vehicle.target_speed;
+  return pow(cost, 2) * EFFICIENCY;
 }
 
 double CostFunctions::calculate_cost(const Vehicle &vehicle,

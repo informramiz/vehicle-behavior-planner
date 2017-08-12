@@ -50,6 +50,15 @@ public:
                                       const map<int, vector<vector<int> > > &predictions,
                                       const vector<Snapshot> &trajectory,
                                       const TrajectoryData &data);
+
+  /**
+   * Calculates cost based on how far vehicle's velocity is from target velocity
+   */
+  double inefficiency_cost(const Vehicle &vehicle,
+                           const map<int, vector<vector<int> > > &predictions,
+                           const vector<Snapshot> &trajectory,
+                           const TrajectoryData &data);
+
   /*
    * Constants
    */
