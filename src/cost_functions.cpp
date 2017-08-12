@@ -63,17 +63,17 @@ double CostFunctions::distance_from_goal_lane_cost(const Vehicle &vehicle,
                                                    const TrajectoryData &data) {
 
   //we don't want distance below 1.0, so if it less then pick 1.0
-  int distance = std::max(data.end_distance_from_goal_lane, 1);
+  int distance = std::max(data.end_distance_to_goal, 1.0);
 
   //calculate in how many timesteps we will reach goal position
   //given that we know avg_speed of vehicle
-  double timesteps_away = data.end_distance_to_goal / data.avg_speed;
+  double timesteps_away = distance / data.avg_speed;
   //find a cost function (multiplier) value based distance from goal_lane and time to reach goal_lane
   //it should be in way so that if time_to_goal is greater then multiplier is less
   //otherwise bigger and vice versal for distance to goal_lane (lanes)
   //as distance from goal lane is a small value so multiply it with a constant
   //to normalize it with timesteps value
-  double cost = (5.0 * distance) / timesteps_away;
+  double cost = (5.0 * data.end_distance_from_goal_lane) / timesteps_away;
 
   //multiple cost with its weight
   cost *= REACH_GOAL;
@@ -195,6 +195,7 @@ TrajectoryData CostFunctions::calculate_helper_data(const Vehicle &vehicle,
 
   //distance left from goal position
   int end_distance_from_goal = vehicle.goal_s - last_snapshot.s;
+
   //distance of current lane from goal lane
   int end_distance_from_goal_lane = abs(vehicle.goal_lane - last_snapshot.lane);
 
